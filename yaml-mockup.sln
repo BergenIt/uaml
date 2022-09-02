@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yaml-moq", "yaml-moq\yaml-moq.csproj", "{688D6BA2-2151-4E1C-8219-97AC7748A1AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yaml-mockup.core", "yaml-mockup.core\yaml-mockup.core.csproj", "{34A55E9E-6A72-4889-B6FA-572B8F5CAB07}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{A9DED9C4-6E0D-4D23-A909-3BEED29B95E1}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{688D6BA2-2151-4E1C-8219-97AC7748A1AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{688D6BA2-2151-4E1C-8219-97AC7748A1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{688D6BA2-2151-4E1C-8219-97AC7748A1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{688D6BA2-2151-4E1C-8219-97AC7748A1AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34A55E9E-6A72-4889-B6FA-572B8F5CAB07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34A55E9E-6A72-4889-B6FA-572B8F5CAB07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34A55E9E-6A72-4889-B6FA-572B8F5CAB07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34A55E9E-6A72-4889-B6FA-572B8F5CAB07}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BDEA8F9C-CBD4-42E0-9D09-C750086143AC}
+	EndGlobalSection
+EndGlobal

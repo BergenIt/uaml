@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>YamlMockup.Core</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="2.8.2.1" />
+		<PackageReference Include="Markdig" Version="0.30.3" />
+		<PackageReference Include="QuestPDF" Version="2202.8.2" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.0" />
+		<PackageReference Include="YamlDotNet" Version="12.0.0" />
+		<PackageReference Include="Microcharts" Version="0.9.5.9" />
+		<PackageReference Include="MudBlazor" Version="6.0.14" />
+		<PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.0" />
+	</ItemGroup>
+	
+</Project>

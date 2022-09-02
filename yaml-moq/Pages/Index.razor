@@ -1,0 +1,135 @@
+﻿@page "/"
+@using BlazorMonaco
+@using System.Buffers.Text
+@using YamlMockup.Core
+@inject IJSRuntime JSRuntime
+
+<MudGrid Spacing="1" Justify="Justify.SpaceAround">
+    <MudItem>
+        <MudPaper Height="100%" Width="100%">
+            <MonacoEditor @ref=_editor
+                Id="sample-code-editor-123"
+                OnDidInit="AddCommand"
+                ConstructionOptions="EditorConstructionOptions" />
+        </MudPaper>
+    </MudItem>
+    <MudItem>
+        @if (!string.IsNullOrWhiteSpace(_mudImage))
+        {
+            <MudImage Src="@_mudImage" Alt="Mony the dog" Elevation="25" Class="rounded-lg" />
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    private const string value = @"PageName: Пользователи системы
+PageComment: Описание страницы
+
+ItemContents:
+    -   Y: 100:700
+        X: 50:1800
+        Type: Table
+        Border: 1
+        Link: search
+        Content: Логин | Срок действия | Роль
+        Text: >
+            yvturbin     | 20.10.2023  | Оператор
+            | SuperAdmin | 02.11.2023  | Адмнистратор
+            | ASOINVAN   | 12.01.2027  | Оператор
+
+    -   X: 1700:150
+        Y: 25:25
+        Text: Search
+        Content: search
+        Name: search
+";
+
+    private MonacoEditor? _editor { get; set; }
+    private YamlPageDrawer _yamlPageDrawer { get; } = new();
+    private string? _mudImage { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {     
+        if (_editor is null || !string.IsNullOrWhiteSpace(_mudImage))
+        {
+            return;
+        }
+
+        PageContent pageContent = PageContent.Parse(value);
+
+        byte[] data = _yamlPageDrawer.DrawImage(pageContent);
+
+        string imagesrc = Convert.ToBase64String(data);
+
+        _mudImage  = string.Format("data:image/jpeg;base64,{0}", imagesrc);
+    }
+
+    private async Task OnSave()
+    {
+        if (_editor is null)
+        {
+            return;
+        }
+
+        _mudImage = null;
+
+        string value = await _editor.GetValue();
+
+        PageContent pageContent = PageContent.Parse(value);
+
+        byte[] data = _yamlPageDrawer.DrawPdf(pageContent);
+
+        await JSRuntime.SaveAs("moq.pdf", data);
+    }
+
+    private async Task OnDraw()
+    {
+        if (_editor is null)
+        {
+            return;
+        }
+
+        _mudImage = null;
+
+        string value = await _editor.GetValue();
+
+        PageContent pageContent = PageContent.Parse(value);
+
+        byte[] data = _yamlPageDrawer.DrawImage(pageContent);
+
+        string imagesrc = Convert.ToBase64String(data);
+        
+        _mudImage = string.Format("data:image/jpeg;base64,{0}", imagesrc);
+
+        base.StateHasChanged();
+    }
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                Language = "yaml",
+                AutomaticLayout = true,
+                Theme = "vs-dark",
+                Value = value,
+            };
+    }
+
+    private async Task AddCommand()
+    {
+        if (_editor is null)
+        {
+            return;
+        }
+
+        await _editor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S, async (editor, keyCode) =>
+        {
+            await OnSave();
+        });
+        await _editor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_P, async (editor, keyCode) =>
+       {
+           await OnDraw();
+       });
+    }
+
+}
