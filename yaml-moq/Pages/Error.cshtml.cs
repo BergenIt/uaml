@@ -4,21 +4,26 @@ using System.Diagnostics;
 
 namespace YamlMockup.Pages
 {
+    /// <summary>
+    /// Дефлотная страница ошибки
+    /// </summary>
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [IgnoreAntiforgeryToken]
     public class ErrorModel : PageModel
     {
+        /// <summary>
+        /// Id запроса
+        /// </summary>
         public string? RequestId { get; set; }
 
+        /// <summary>
+        /// Показывать {RequestId}
+        /// </summary>
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-        private readonly ILogger<ErrorModel> _logger;
-
-        public ErrorModel(ILogger<ErrorModel> logger)
-        {
-            _logger = logger;
-        }
-
+        /// <summary>
+        /// Дефлотная страница ошибки
+        /// </summary>
         public void OnGet()
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;

@@ -6,11 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>YamlMockup</RootNamespace>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
 	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>

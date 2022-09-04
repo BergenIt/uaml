@@ -19,4 +19,5 @@ RUN dotnet publish "yaml-moq.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=publish /app/build/yaml-moq.xml .
 ENTRYPOINT ["dotnet", "yaml-moq.dll"]

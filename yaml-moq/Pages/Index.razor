@@ -22,28 +22,6 @@
 </MudGrid>
 
 @code {
-    private const string value = @"PageName: Пользователи системы
-PageComment: Описание страницы
-
-ItemContents:
-    -   Y: 100:700
-        X: 50:1800
-        Type: Table
-        Border: 1
-        Link: search
-        Content: Логин | Срок действия | Роль
-        Text: >
-            yvturbin     | 20.10.2023  | Оператор
-            | SuperAdmin | 02.11.2023  | Адмнистратор
-            | ASOINVAN   | 12.01.2027  | Оператор
-
-    -   X: 1700:150
-        Y: 25:25
-        Text: Search
-        Content: search
-        Name: search
-";
-
     private MonacoEditor? _editor { get; set; }
     private YamlPageDrawer _yamlPageDrawer { get; } = new();
     private string? _mudImage { get; set; }
@@ -55,7 +33,7 @@ ItemContents:
             return;
         }
 
-        PageContent pageContent = PageContent.Parse(value);
+        PageContent pageContent = PageContent.Parse(Core.Default.DefaultValue);
 
         byte[] data = _yamlPageDrawer.DrawImage(pageContent);
 
@@ -98,7 +76,7 @@ ItemContents:
         byte[] data = _yamlPageDrawer.DrawImage(pageContent);
 
         string imagesrc = Convert.ToBase64String(data);
-        
+
         _mudImage = string.Format("data:image/jpeg;base64,{0}", imagesrc);
 
         base.StateHasChanged();
@@ -111,7 +89,7 @@ ItemContents:
                 Language = "yaml",
                 AutomaticLayout = true,
                 Theme = "vs-dark",
-                Value = value,
+                Value = Core.Default.DefaultValue,
             };
     }
 

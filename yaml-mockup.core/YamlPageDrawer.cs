@@ -31,9 +31,23 @@ public class YamlPageDrawer
     {
         FontManager.RegisterFont(File.OpenRead("3270-Medium Nerd Font Complete Mono Windows Compatible.ttf"));
     }
+
     public byte[] DrawPdf(PageContent pageContent)
     {
         return Draw(pageContent).GeneratePdf();
+    }
+
+    public byte[] DrawPdf(IEnumerable<PageContent> pageContents)
+    {
+        Document document = Document.Create(container =>
+        {
+            foreach (PageContent pageContent in pageContents)
+            {
+                DrawPage(container, pageContent);
+            }
+        });
+
+        return document.GeneratePdf();
     }
 
     public byte[] DrawImage(PageContent pageContent)
@@ -42,6 +56,13 @@ public class YamlPageDrawer
     }
 
     private Document Draw(PageContent pageContent)
+    {
+        Document document = Document.Create(container => DrawPage(container, pageContent));
+
+        return document;
+    }
+
+    public IDocumentContainer DrawPage(IDocumentContainer document, PageContent pageContent)
     {
         for (int i = 0; i < pageContent.ItemContents.Length; i++)
         {
@@ -78,57 +99,54 @@ public class YamlPageDrawer
             maxY = pageContent.MinY ?? DefaultMinY;
         }
 
-        Document document = Document.Create(container =>
+        document = document.Page(page =>
         {
-            _ = container.Page(page =>
+            SetStyle(pageContent.PageName, maxX, maxY, page);
+            SetFooter(pageContent, page);
+
+            page.Content().Border(1).Layers(layers =>
             {
-                SetStyle(pageContent.PageName, maxX, maxY, page);
-                SetFooter(pageContent, page);
+                List<Action<ColumnDescriptor>> textActions = new();
 
-                page.Content().Border(1).Layers(layers =>
+                Dictionary<string, IEnumerable<ItemContent>> groupedContents = pageContent.ItemContents
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Name))
+                    .GroupBy(c => c.Name!)
+                    .ToDictionary(d => d.Key, d => d.AsEnumerable());
+
+                foreach (ItemContent itemContent in pageContent.ItemContents)
                 {
-                    List<Action<ColumnDescriptor>> textActions = new();
-
-                    Dictionary<string, IEnumerable<ItemContent>> groupedContents = pageContent.ItemContents
-                        .Where(c => !string.IsNullOrWhiteSpace(c.Name))
-                        .GroupBy(c => c.Name!)
-                        .ToDictionary(d => d.Key, d => d.AsEnumerable());
-
-                    foreach (ItemContent itemContent in pageContent.ItemContents)
+                    if (itemContent.Text is not null && itemContent.Type is not ItemContentType.Table)
                     {
-                        if (itemContent.Text is not null && itemContent.Type is not ItemContentType.Table)
-                        {
-                            textActions.Add(c => c
-                                .Item()
-                                .Unconstrained()
-                                .TranslateY(itemContent.Y.FirstObject + itemContent.Height / itemContent.Text.Length)
-                                .TranslateX(itemContent.X.FirstObject + itemContent.Width / itemContent.Text.Length)
-                                .Border((itemContent.Width > 0 && itemContent.Height > 0) ? 0f : itemContent.Border ?? 0f)
-                                .Text(itemContent.Text)
-                                .FontSize(itemContent.FontSize ?? DefaultFontSize)
-                            );
-                        }
-
-                        layers.Layer().Element(c => DrawItem(c, itemContent, groupedContents.Keys));
-                    };
-
-                    layers.PrimaryLayer().Column(c => textActions.ForEach(a => a(c)));
-
-                    foreach (ItemContent itemContent in pageContent.ItemContents)
-                    {
-                        if (!string.IsNullOrWhiteSpace(itemContent.Link) && !itemContent.HideLink && groupedContents.TryGetValue(itemContent.Link, out IEnumerable<ItemContent>? linkedContents))
-                        {
-                            DrawLink(layers, itemContent, linkedContents);
-                        }
+                        textActions.Add(c => c
+                            .Item()
+                            .Unconstrained()
+                            .TranslateY(itemContent.Y.FirstObject + itemContent.Height / itemContent.Text.Length)
+                            .TranslateX(itemContent.X.FirstObject + itemContent.Width / itemContent.Text.Length)
+                            .Border((itemContent.Width > 0 && itemContent.Height > 0) ? 0f : itemContent.Border ?? 0f)
+                            .Text(itemContent.Text)
+                            .FontSize(itemContent.FontSize ?? DefaultFontSize)
+                        );
                     }
 
-                    if (pageContent.Debug)
-                    {
-                        layers.Layer().Element(c => DrawGrid(c, maxX, maxY));
-                    }
-                });
+                    layers.Layer().Element(c => DrawItem(c, itemContent, groupedContents.Keys));
+                };
 
+                layers.PrimaryLayer().Column(c => textActions.ForEach(a => a(c)));
+
+                foreach (ItemContent itemContent in pageContent.ItemContents)
+                {
+                    if (!string.IsNullOrWhiteSpace(itemContent.Link) && !itemContent.HideLink && groupedContents.TryGetValue(itemContent.Link, out IEnumerable<ItemContent>? linkedContents))
+                    {
+                        DrawLink(layers, itemContent, linkedContents);
+                    }
+                }
+
+                if (pageContent.Debug)
+                {
+                    layers.Layer().Element(c => DrawGrid(c, maxX, maxY));
+                }
             });
+
         });
 
         return document;
