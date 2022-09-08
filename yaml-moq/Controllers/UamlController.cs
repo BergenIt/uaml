@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PdfToSvg;
 using YamlMockup.Core;
 
 namespace YamlMockup.Controllers;
@@ -16,7 +17,7 @@ public class UamlController : ControllerBase
     private readonly YamlPageDrawer _yamlPageDrawer = new();
 
     /// <summary>
-    /// Сгенерировать пдф из Uaml файла
+    /// Сгенерировать Pdf из Uaml файла
     /// </summary>
     /// <param name="yaml">Содержимое Uaml файла</param>
     /// <returns>Pdf с мокапом</returns>
@@ -27,7 +28,45 @@ public class UamlController : ControllerBase
 
         byte[] data = _yamlPageDrawer.DrawPdf(pageContent);
 
-        return base.File(data, ContentType, GetFileName(pageContent.PageName));
+        return base.File(data, ContentType, GetFileName(pageContent.PageName) + ".pdf");
+    }
+
+    /// <summary>
+    /// Сгенерировать Png из Uaml файла
+    /// </summary>
+    /// <param name="yaml">Содержимое Uaml файла</param>
+    /// <returns>Png с мокапом</returns>
+    [HttpPut(nameof(GeneratePageAsPng))]
+    public FileContentResult GeneratePageAsPng([FromBody] string yaml = Default.DefaultValue)
+    {
+        PageContent pageContent = PageContent.Parse(yaml);
+
+        byte[] data = _yamlPageDrawer.DrawImage(pageContent);
+
+        return base.File(data, "image/png", GetFileName(pageContent.PageName) + ".png");
+    }
+
+    /// <summary>
+    /// Сгенерировать Svg из Uaml файла
+    /// </summary>
+    /// <param name="yaml">Содержимое Uaml файла</param>
+    /// <returns>Svg с мокапом</returns>
+    [HttpPut(nameof(GeneratePageAsSvg))]
+    public FileContentResult GeneratePageAsSvg([FromBody] string yaml = Default.DefaultValue)
+    {
+        PageContent pageContent = PageContent.Parse(yaml);
+
+        Stream stream = _yamlPageDrawer.DrawPdfAsStream(pageContent);
+
+        PdfToSvg.PdfDocument document = PdfToSvg.PdfDocument.Open(stream, false);
+
+        MemoryStream memoryStream = new();
+
+        document.Pages.First().SaveAsSvg(memoryStream);
+
+        byte[] data = memoryStream.ToArray();
+
+        return base.File(data, "application/svg", GetFileName(pageContent.PageName) + ".svg");
     }
 
     /// <summary>
@@ -56,3 +95,4 @@ public class UamlController : ControllerBase
         return $"{NameBase}-{name}-{DateTime.Now.ToShortDateString()}-{DateTime.Now.ToShortTimeString()}";
     }
 }
+

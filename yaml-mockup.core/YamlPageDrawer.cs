@@ -37,6 +37,15 @@ public class YamlPageDrawer
         return Draw(pageContent).GeneratePdf();
     }
 
+    public Stream DrawPdfAsStream(PageContent pageContent)
+    {
+        MemoryStream memoryStream = new();
+
+        Draw(pageContent).GeneratePdf(memoryStream);
+
+        return memoryStream;
+    }
+
     public byte[] DrawPdf(IEnumerable<PageContent> pageContents)
     {
         Document document = Document.Create(container =>
@@ -53,6 +62,11 @@ public class YamlPageDrawer
     public byte[] DrawImage(PageContent pageContent)
     {
         return Draw(pageContent).GenerateImages().First();
+    }
+
+    public byte[] DrawXps(PageContent pageContent)
+    {
+        return Draw(pageContent).GenerateXps();
     }
 
     private Document Draw(PageContent pageContent)
