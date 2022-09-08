@@ -12,7 +12,6 @@ namespace YamlMockup.Controllers;
 public class UamlController : ControllerBase
 {
     private const string NameBase = "Uaml";
-    private const string ContentType = "application/pdf";
 
     private readonly YamlPageDrawer _yamlPageDrawer = new();
 
@@ -28,7 +27,7 @@ public class UamlController : ControllerBase
 
         byte[] data = _yamlPageDrawer.DrawPdf(pageContent);
 
-        return base.File(data, ContentType, GetFileName(pageContent.PageName) + ".pdf");
+        return base.File(data, "application/pdf", GetFileName(pageContent.PageName) + ".pdf");
     }
 
     /// <summary>
@@ -47,6 +46,21 @@ public class UamlController : ControllerBase
     }
 
     /// <summary>
+    /// Сгенерировать xps из Uaml файла
+    /// </summary>
+    /// <param name="yaml">Содержимое Uaml файла</param>
+    /// <returns>xps с мокапом</returns>
+    [HttpPut(nameof(GeneratePageAsXps))]
+    public FileContentResult GeneratePageAsXps([FromBody] string yaml = Default.DefaultValue)
+    {
+        PageContent pageContent = PageContent.Parse(yaml);
+
+        byte[] data = _yamlPageDrawer.DrawXps(pageContent);
+
+        return base.File(data, "application/xps", GetFileName(pageContent.PageName) + ".xps");
+    }
+
+    /// <summary>
     /// Сгенерировать Svg из Uaml файла
     /// </summary>
     /// <param name="yaml">Содержимое Uaml файла</param>
@@ -58,7 +72,7 @@ public class UamlController : ControllerBase
 
         Stream stream = _yamlPageDrawer.DrawPdfAsStream(pageContent);
 
-        PdfToSvg.PdfDocument document = PdfToSvg.PdfDocument.Open(stream, false);
+        PdfDocument document = PdfDocument.Open(stream, false);
 
         MemoryStream memoryStream = new();
 
@@ -87,7 +101,7 @@ public class UamlController : ControllerBase
 
         byte[] data = _yamlPageDrawer.DrawPdf(pageContents);
 
-        return base.File(data, ContentType, GetFileName(name));
+        return base.File(data, "application/pdf", GetFileName(name) + ".pdf");
     }
 
     private static string GetFileName(string name)
