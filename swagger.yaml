@@ -7,7 +7,76 @@ paths:
     put:
       tags:
         - Uaml
-      summary: Сгенерировать пдф из Uaml файла
+      summary: Сгенерировать Pdf из Uaml файла
+      requestBody:
+        description: Содержимое Uaml файла
+        content:
+          application/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          text/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          application/*+json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+      responses:
+        '200':
+          description: Success
+  /api/Uaml/GeneratePageAsPng:
+    put:
+      tags:
+        - Uaml
+      summary: Сгенерировать Png из Uaml файла
+      requestBody:
+        description: Содержимое Uaml файла
+        content:
+          application/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          text/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          application/*+json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+      responses:
+        '200':
+          description: Success
+  /api/Uaml/GeneratePageAsXps:
+    put:
+      tags:
+        - Uaml
+      summary: Сгенерировать xps из Uaml файла
+      requestBody:
+        description: Содержимое Uaml файла
+        content:
+          application/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          text/json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+          application/*+json:
+            schema:
+              type: string
+              default: "PageName: Пользователи системы\nPageComment: Описание страницы\nItemContents:\n    -   Y: 100:700\n        X: 50:1800\n        Type: Table\n        Border: 1\n        Link: search\n        Content: Логин | Срок действия | Роль\n        Text: >\n            yvturbin     | 20.10.2023  | Оператор\n            | SuperAdmin | 02.11.2023  | Адмнистратор\n            | ASOINVAN   | 12.01.2027  | Оператор\n    -   X: 1700:150\n        Y: 25:25\n        Text: Search\n        Content: search\n        Name: search\n"
+      responses:
+        '200':
+          description: Success
+  /api/Uaml/GeneratePageAsSvg:
+    put:
+      tags:
+        - Uaml
+      summary: Сгенерировать Svg из Uaml файла
       requestBody:
         description: Содержимое Uaml файла
         content:
