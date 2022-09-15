@@ -1,6 +1,6 @@
-# uaml-consumer README
+# uamlConsumer README
 
-This is the README for your extension "uaml-consumer". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "uamlConsumer". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

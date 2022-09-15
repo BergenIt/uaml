@@ -1,76 +1,30 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import fetch, { Blob, Headers } from 'node-fetch';
 import * as fs from 'fs';
-import { SvgViewerProvider } from './svgView';
 
-const uamlToSvg = "api/Uaml/GeneratePageAsSvg";
-const getPdf = "api/Uaml/GenerateProject/";
+const uamlToSvg = "/api/Uaml/GeneratePageAsSvg";
+const getPdf = "/api/Uaml/GenerateProject/";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext): void {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "uaml-consumer" is now active!');
-	
-	let cfg: vscode.WorkspaceConfiguration | undefined = vscode.workspace.getConfiguration("uamlConsumer");
+export function activate(context: vscode.ExtensionContext) {
 
-	let headers: Object | undefined = cfg.get("server.optional.headers");
+	let cfg: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("uamlConsumer");
 
-	let currentPanel: vscode.WebviewPanel | undefined = undefined;
-	
-	
-	context.subscriptions.push(SvgViewerProvider.register(context));
-	
-	context.subscriptions.push(vscode.commands.registerCommand("uaml-consumer.getDataFromOne", () => {
-
-		const columnToShowIn = vscode.window.activeTextEditor
-        ? vscode.ViewColumn.Beside
-        : undefined;
-
-		let body = vscode.window.activeTextEditor?.document.getText();
-		let fName = vscode.window.activeTextEditor?.document.fileName;
-
-		if (fName?.endsWith('.uaml')){
-			vscode.window.showInformationMessage("File is .uaml extension");
-			if (currentPanel) {
-				console.log("already have panel");
-				currentPanel.reveal(columnToShowIn);
-				getUaml((<vscode.WorkspaceConfiguration>cfg), body, headers, uamlToSvg, '').then(data => {
-					if(currentPanel !== undefined) {
-						currentPanel.webview.html = getWebview((<string>data));
-					}
+	context.subscriptions.push(
+		vscode.commands.registerCommand('uamlConsumer.start', () => {
+			const file: vscode.TextDocument | undefined = vscode.window.activeTextEditor?.document;
+			if(file?.fileName.endsWith('.uaml')) {
+				// Open preview only if file has extension '.uaml'
+				let body: string = file.getText();
+				getUaml(cfg, body, uamlToSvg, ""). then((data) => {
+					UamlConsumerPanel.createOrShow(context.extensionUri, (<string>data));
 				});
 			} else {
-				console.log("create new panel");
-				currentPanel = vscode.window.createWebviewPanel(
-					'uaml',
-					'Preview',
-					(<vscode.ViewColumn>columnToShowIn),
-					{}
-				);
-				getUaml((<vscode.WorkspaceConfiguration>cfg), body, headers, uamlToSvg, '').then(data => {
-					if(currentPanel !== undefined){
-						currentPanel.webview.html = getWebview((<string>data));
-					}
-				});
-
-				// Reset when the current panel is closed
-				currentPanel.onDidDispose(
-					() => {
-						 currentPanel = undefined;
-					},
-					null,
-					context.subscriptions
-				);
+				vscode.window.showErrorMessage('wrong extension file');
 			}
-		}
-}));
+		})
+	);
 
-	context.subscriptions.push(vscode.commands.registerCommand("uaml-consumer.getDataFromProject", () => {
+	context.subscriptions.push(vscode.commands.registerCommand("uamlConsumer.pdf", () => {
 		let filesData: string[] = [];
 		
 		vscode.workspace.findFiles('**/*.uaml', null).then(res => {
@@ -81,9 +35,13 @@ export function activate(context: vscode.ExtensionContext): void {
 					filesData.push(doc.getText());
 				})
 			).then(() => {
-				let workspaceName = vscode.workspace.name;
-				console.log("workspace name: ", workspaceName);
-				getUaml((<vscode.WorkspaceConfiguration>cfg), filesData, headers, getPdf, workspaceName).then((blob) => {
+				let workspaceName = "";
+				
+				if (vscode.workspace.name) {
+					workspaceName = vscode.workspace.name;
+				}
+				
+				getUaml(cfg, filesData, getPdf, workspaceName).then((blob) => {
 					if(blob instanceof Blob && blob !== undefined) {
 						(<Blob>blob).arrayBuffer().then((buf) => {
 								let path: string | undefined = vscode.workspace.rootPath;
@@ -100,21 +58,155 @@ export function activate(context: vscode.ExtensionContext): void {
 			});
 		});
 	}));
+
+	if (vscode.window.registerWebviewPanelSerializer) {
+		// Make sure we register a serializer in activation event
+		vscode.window.registerWebviewPanelSerializer(UamlConsumerPanel.viewType, {
+			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+				console.log(`Got state: ${state}`);
+				// Reset the webview options so we use latest uri for `localResourceRoots`.
+				webviewPanel.webview.options = getWebviewOptions(context.extensionUri);
+				UamlConsumerPanel.revive(webviewPanel, context.extensionUri);
+			}
+		});
+	}
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
+	return {
+		// Enable javascript in the webview
+		enableScripts: true,
 
-async function getUaml(cfg: vscode.WorkspaceConfiguration, body?: any, headers?: any, method?: string, workspaceName?: string): Promise<string | Blob | undefined> {
+		// And restrict the webview to only loading content from our extension's `media` directory.
+		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
+	};
+}
+
+/**
+ * Manages svg webview panels
+ */
+class UamlConsumerPanel {
+	/**
+	 * Track the currently panel. Only allow a single panel to exist at a time.
+	 */
+	public static currentPanel: UamlConsumerPanel | undefined;
+	
+	public static readonly viewType = 'uamlConsumer';
+	
+	
+	//private readonly _currentEditor: vscode.TextEditor;
+	private readonly _panel: vscode.WebviewPanel;
+	
+	private readonly _extensionUri: vscode.Uri;
+	private _disposables: vscode.Disposable[] = [];
+
+	public static createOrShow(extensionUri: vscode.Uri, data: string) {
+		const column = vscode.window.activeTextEditor
+			? vscode.ViewColumn.Beside
+			: undefined;
+
+		// If we already have a panel, show it.
+		if (UamlConsumerPanel.currentPanel) {
+			UamlConsumerPanel.currentPanel._panel.reveal(column);
+			this.revive(UamlConsumerPanel.currentPanel._panel, extensionUri, data);
+			return;
+		}
+
+		// Otherwise, create a new panel.
+		const panel = vscode.window.createWebviewPanel(
+			UamlConsumerPanel.viewType,
+			'Preview',
+			vscode.ViewColumn.Beside,
+			getWebviewOptions(extensionUri),
+		);
+
+		UamlConsumerPanel.currentPanel = new UamlConsumerPanel(panel, extensionUri, data);
+	}
+
+	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, data?: any) {
+		if (data === undefined) {
+			console.log("data empty");
+		}
+		UamlConsumerPanel.currentPanel = new UamlConsumerPanel(panel, extensionUri);
+	}
+
+	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, data?: string) {	
+		this._panel = panel;
+		this._extensionUri = extensionUri;
+
+		// Set html initial
+		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, data);
+
+		// Listen for when the panel is disposed
+		// This happens when the user closes the panel or when the panel is closed programmatically
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+
+
+		// Handle messages from the webview
+		this._panel.webview.onDidReceiveMessage(
+			message => {
+				switch (message.command) {
+					case 'alert':
+						vscode.window.showErrorMessage(message.text);
+						return;
+				}
+			},
+			null,
+			this._disposables
+		);
+	}
+
+	public dispose() {
+		UamlConsumerPanel.currentPanel = undefined;
+
+
+		// Clean up our resources
+		this._panel.dispose();
+
+		while (this._disposables.length) {
+			const x = this._disposables.pop();
+			if (x) {
+				x.dispose();
+			}
+		}
+	}
+
+	private _getHtmlForWebview(webview: vscode.Webview, data?: any) {
+		// Local path to main script run in the webview
+		const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js');
+
+		// And the uri we use to load this script in the webview
+		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
+
+
+		return `<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Svg webview</title>
+				</head>
+			<body>
+			<span id="zoomValue">1</span>
+			<div id="svgContainer">
+				${data}
+			</div>
+			<script src="${scriptUri}"></script>
+			</body>
+			</html>`;
+	}
+}
+
+async function getUaml(cfg: vscode.WorkspaceConfiguration, body: any, method: string, workspaceName: string): Promise<string | Blob | undefined> {
 	console.log('start requesting to service');
-	
-	let _headers = new Headers(headers);
-	
+
+	let headers: any = cfg.get("server.optional.headers");
 	let url = cfg.get("server.uri");
 	let login = cfg.get("login");
 	let password = cfg.get("password");
-
-	_headers.set('Authorization', 'Basic ' + (login + ":" + password));
+	
+	let _headers = new Headers(headers);
+	_headers.set('Authorization', 'Basic ' + Buffer.from(login + ":" + password).toString('base64'));
 
 	console.log("Headers: ", _headers);
 	console.log("BODY: ", body);
@@ -146,18 +238,3 @@ async function getUaml(cfg: vscode.WorkspaceConfiguration, body?: any, headers?:
 			return blob;
 	}
 }
-
-function getWebview(src?: string): string {
-	return `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=0.5">
-		<title>Svg preview</title>
-	</head>
-	<body>
-		${src}
-	</body>
-	</html>`;
-}
-
