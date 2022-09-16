@@ -1,7 +1,7 @@
 {
   "name": "uaml-consumer",
-  "displayName": "Uaml consumer",
-  "description": "Получение кликабельных pdf файлов из uaml файлов ",
+  "displayName": "Uaml Consumer",
+  "description": "",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.71.0"
@@ -10,32 +10,21 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:uaml-consumer.getDataFromOne",
-    "onCommand:uaml-consumer.getDataFromProject",
-    "onCustomEditor:uaml-consumer.svg"
+    "onCommand:uamlConsumer.start",
+    "onCommand:uamlConsumer.pdf",
+    "onWebviewPanel:uamlConsumer"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "customEditors": [
-			{
-				"viewType": "uaml-consumer.svg",
-				"displayName": "Pdf Viewer",
-				"selector": [
-					{
-						"filenamePattern": "*.svg"
-					}
-				]
-		  }
-    ],
     "commands": [
       {
-        "command": "uaml-consumer.getDataFromOne",
-        "title": "Get Uaml doc",
+        "command": "uamlConsumer.start",
+        "title": "Start",
         "category": "uamlConsumer"
       },
       {
-        "command": "uaml-consumer.getDataFromProject",
-        "title": "Get Uaml project docs",
+        "command": "uamlConsumer.pdf",
+        "title": "Project pdf",
         "category": "uamlConsumer"
       }
     ],
@@ -46,12 +35,14 @@
           "uamlConsumer.server.uri": {
             "description": "Базовый URI uaml-сервера",
             "type": "string",
-            "default": ""
+            "default": "http:/127.0.0.1:8085"
           },
           "uamlConsumer.server.optional.headers": {
             "description": "Дополнительные заголовки, используемые плагином при запросах на сервер",
             "type": "object",
-            "default": {}
+            "default": {
+              "Content-type": "application/json"
+            }
           },
           "uamlConsumer.login": {
             "description": "Логин для доступа к сервису",
@@ -64,6 +55,14 @@
             "default": "none"
           }
         }
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "uamlConsumer.start",
+        "key": "ctrl+[",
+        "mac": "cmd+[",
+        "when": "editorTextFocus"
       }
     ]
   },
@@ -95,6 +94,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "fetch": "^1.1.0",
     "node-fetch": "^3.2.10"
   }
 }
