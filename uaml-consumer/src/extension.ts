@@ -124,10 +124,7 @@ class UamlConsumerPanel {
 	}
 
 	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, data?: any) {
-		if (data === undefined) {
-			console.log("data empty");
-		}
-		UamlConsumerPanel.currentPanel = new UamlConsumerPanel(panel, extensionUri);
+		UamlConsumerPanel.currentPanel = new UamlConsumerPanel(panel, extensionUri, data);
 	}
 
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, data?: string) {	
@@ -146,8 +143,13 @@ class UamlConsumerPanel {
 		this._panel.webview.onDidReceiveMessage(
 			message => {
 				switch (message.command) {
-					case 'alert':
-						vscode.window.showErrorMessage(message.text);
+					case 'relative':
+						vscode.window.showInformationMessage(message.text);
+						let path = vscode.Uri.joinPath(vscode.Uri.parse(<string>vscode.workspace.rootPath), message.text);
+						console.log(path);
+						vscode.workspace.openTextDocument(path).then((doc) => {
+							vscode.window.showTextDocument(doc, vscode.ViewColumn.One, false);
+						}).then(undefined, console.error);
 						return;
 				}
 			},
@@ -177,6 +179,8 @@ class UamlConsumerPanel {
 
 		// And the uri we use to load this script in the webview
 		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
+
+		console.log(data);
 
 
 		return `<!DOCTYPE html>
