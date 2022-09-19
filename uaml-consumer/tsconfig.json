@@ -8,11 +8,7 @@
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
-<<<<<<< HEAD
 		"outDir": "dist"   /* enable all strict type-checking options */
-=======
-		"outDir": "dist" /* enable all strict type-checking options */
->>>>>>> f40c15d901d8e5c31682b86f1981cc84ee4d4ef8
 		/* Additional Checks */
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
 		// "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
