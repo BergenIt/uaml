@@ -2,7 +2,7 @@
   "name": "uaml-consumer",
   "displayName": "Uaml Consumer",
   "description": "Плагин для предварительного просмотра мокапов из файлов с кастомным расширением '.uaml'",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "repository": {"url": "https://github.com/BergenIt/uaml"},
   "engines": {
     "vscode": "^1.71.0"
