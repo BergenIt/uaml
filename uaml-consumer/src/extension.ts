@@ -4,8 +4,9 @@ import * as fs from 'fs';
 
 const uamlToSvg = "/api/Uaml/GeneratePageAsSvg";
 const getPdf = "/api/Uaml/GenerateProject/";
+var viewBox: object | undefined;
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
 
 	let cfg: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("uamlConsumer");
 
@@ -45,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 					if(blob instanceof Blob && blob !== undefined) {
 						(<Blob>blob).arrayBuffer().then((buf) => {
 								let path: string | undefined = vscode.workspace.rootPath;
+								
 								fs.appendFile(`${path}/${workspaceName}.pdf`, Buffer.from(buf), err => {
 								if (err) {
 									console.error("can't write data to file: ", err);
@@ -133,6 +135,13 @@ class UamlConsumerPanel {
 
 		// Set html initial
 		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, data);
+		
+		// Set view coordinates
+		console.log('view on start: ', viewBox);
+		this._panel.webview.postMessage({
+			command: 'viewBox',
+			viewBox: viewBox,
+		});
 
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel or when the panel is closed programmatically
@@ -151,6 +160,8 @@ class UamlConsumerPanel {
 							vscode.window.showTextDocument(doc, vscode.ViewColumn.One, false);
 						}).then(undefined, console.error);
 						return;
+					case 'view':
+						viewBox = message.viewBox;
 				}
 			},
 			null,
@@ -160,7 +171,6 @@ class UamlConsumerPanel {
 
 	public dispose() {
 		UamlConsumerPanel.currentPanel = undefined;
-
 
 		// Clean up our resources
 		this._panel.dispose();
@@ -182,7 +192,6 @@ class UamlConsumerPanel {
 
 		console.log(data);
 
-
 		return `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -191,7 +200,7 @@ class UamlConsumerPanel {
 				<title>Svg webview</title>
 				</head>
 			<body>
-			<span id="zoomValue">1</span>
+			<span id="zoomValue">1</span> масштаб
 			<div id="svgContainer">
 				${data}
 			</div>
