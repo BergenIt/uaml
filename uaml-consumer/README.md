@@ -1,4 +1,4 @@
-# uaml-consumer README
+# uaml-consumer
 
 Плагин позволяющий комфортно работать с мокапами описанной документации в среде VS Code. Утилита выполняющая функцию создания кликабельных мокапов позволяет плагину отображать ваши документы в окне предварительного просмотра. 
 
@@ -18,11 +18,10 @@
 
 - перемещение по рабочей директории с помощью относительных ссылок в предварительном окне просмотра
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
 ## Requirements
 
 Для комфортной работы рекомендуется установить `vscode-pdf` 
+
 ## Extension Settings
 
 * `uamlConsumer.server.uri`: Базовый URI uaml-сервера для доступа к утилите **uaml**
