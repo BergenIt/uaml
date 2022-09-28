@@ -5,6 +5,8 @@
 Имеет простой веб-интерфейс для ознакомления и OpenApi запросы для интеграции с другими решениями.
 В планах реализация плагинов vscode и docsify.
 
+Для работы рекомендуется плагин для [vscode](https://marketplace.visualstudio.com/items?itemName=githubbergen.uaml-consumer)
+
 ## Развертывание
 
 ```bash
